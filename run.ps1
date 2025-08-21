@@ -1,0 +1,1 @@
+﻿Import-Module ./src/KnowIT.Builder.psm1 -Force -DisableNameChecking
