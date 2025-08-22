@@ -12,7 +12,7 @@
         CompanyName = 'KnowIT'
         Copyright = '(c) 2025 KnowIT Soluciones'
         ProjectUri = ''
-        PowerShellVersion = 5.1
+        PowerShellVersion = 7.2
     }
 }
 

@@ -1,5 +1,4 @@
-﻿
-#region === .Source files ===
+﻿#region === .Source files ===
 $moduleData = Get-ModuleInfo (Split-Pat $PSScriptRoot)
 foreach($scriptFile in Get-ChildItem $moduleData.PSSourceFiles -Include '*.ps1' -Recurse) {
     Write-Debug "Dot sourcing file: $scriptFile..."
