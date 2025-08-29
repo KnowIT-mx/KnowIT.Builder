@@ -2,21 +2,20 @@ function BuildPSM ([switch]$Merge)
 {
     $ErrorActionPreference = 'Stop'
 
-    $moduleData = Get-ModuleInfo
-    $moduleName = $moduleData.ModuleName
-    $output = $moduleData.OutputFolder
+    $moduleName = $ModuleData.ModuleName
+    $output = $ModuleData.OutputFolder
 
-    Write-Build Blue "Module output location: [$output]"
+    Write-Build "Module output location: [$output]"
     $null = New-Item $output -ItemType Directory -Force
 
     try {
-        Write-Build Magenta "  Building module file: '$moduleName.psm1'..."
-        Push-Location (Join-Path $moduleData.ProjectFolder 'src')
+        Write-Build "  Building module file: '$moduleName.psm1'..."
+        Push-Location (Join-Path $ModuleData.ProjectFolder 'src')
 
         $sourceBuilder = [Text.StringBuilder]::new()
         $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-        $sourceFiles = Get-ChildItem $moduleData.PSSourceFiles -Include '*.ps1' -Recurse
+        $sourceFiles = Get-ChildItem $ModuleData.PSSourceFiles -Include '*.ps1' -Recurse
 
         [void]$sourceBuilder.AppendLine("`n#region === Source functions ===")
         foreach($source in $sourceFiles) {
@@ -27,7 +26,7 @@ function BuildPSM ([switch]$Merge)
 
         $currentPSM = "$moduleName.psm1"
         if($Merge -and (Test-Path $currentPSM)) {
-            Write-Build Magenta '  Merging current PSM file...'
+            Write-Build '  Merging current PSM file...'
             [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
             Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
             [void]$sourceBuilder.AppendLine("`n#endregion")
@@ -36,7 +35,7 @@ function BuildPSM ([switch]$Merge)
         # Header for PSM file (using directives must be at the top followed by #requires)
         if($requires.Count -gt 0) {
             [void]$sourceBuilder.Insert(0, "#requires -Modules $($requires -join ', ')`n")
-            Write-Build Magenta '  Writing ''requires.txt'' file...'
+            Write-Build '  Writing ''requires.txt'' file...'
             $requires | Set-Content "$output/requires.txt" -Encoding utf8BOM
         }
         if($usings.Count -gt 0) {
@@ -54,8 +53,8 @@ function BuildPSM ([switch]$Merge)
 
         $sourceCode | Set-Content "$output/$moduleName.psm1" -Encoding utf8BOM
 
-        if($additional = $moduleData.AdditionalFiles) {
-            Write-Build Magenta "  Copying additional files '$additional'..."
+        if($additional = $ModuleData.AdditionalFiles) {
+            Write-Build "  Copying additional files '$additional'..."
             Copy-Item $additional -Destination $output -Recurse -Force
         }
     }

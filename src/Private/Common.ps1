@@ -1,8 +1,4 @@
-﻿function Write-Build {
-    param(
-        $Color,
-        $Message
-    )
-
+﻿function Write-Build ([string]$Message, $Color)
+{
     Write-Verbose $Message -Verbose
 }

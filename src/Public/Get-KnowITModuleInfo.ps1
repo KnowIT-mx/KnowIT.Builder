@@ -1,5 +1,7 @@
 
-function Get-ModuleInfo {
+function Get-KnowITModuleInfo {
+
+    [Alias('moduleinfo')]
     param(
         [string]$Path = '.'
     )
