@@ -16,7 +16,6 @@ function Get-KnowITModuleInfo {
 
         $data = Import-PowerShellDataFile $buildModuleFile -ErrorAction Stop
         $data.ProjectFolder = $rootFolder
-        $data.PSSourceFiles = $data.PSSourceFiles.ForEach({ Join-Path $rootFolder 'src' $_ })
         $outDir = $data.OutputFolder ?? 'out'
         $data.OutputFolder = Join-Path $rootFolder $outDir $data.ModuleName
         $data

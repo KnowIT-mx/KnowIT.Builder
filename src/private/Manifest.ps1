@@ -28,7 +28,7 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.RootModule = "$moduleName.psm1"
     $manifest.Description = $ModuleData.Description
 
-    $manifest.FunctionsToExport = GetPublicFunctions
+    $manifest.FunctionsToExport = $ModuleData.PublicFunctions
     if($ModuleData.ExternalModules) {
         $manifest.RequiredModules = $ModuleData.ExternalModules
         $manifest.ExternalModuleDependencies = $ModuleData.ExternalModules
@@ -65,8 +65,3 @@ function GetBuildVersion ([string]$Version, [int]$BuildNumber = -1)
     [version]$Version
 }
 
-function GetPublicFunctions
-{
-    $publicFolder = $ModuleData.PSSourceFiles.Where({ (Split-Path $_ -Leaf) -eq 'Public' })
-    (Get-ChildItem $publicFolder -Include '*.ps1' -Recurse).BaseName
-}

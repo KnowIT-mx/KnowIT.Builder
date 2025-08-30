@@ -1,10 +1,10 @@
 ﻿@{
-    ModuleName      = 'KnowIT.Builder'
-    Description     = 'Module to help in the creation and building of new PowerShell Modules'
-    Version         = '0.0.x-beta'
+    ModuleName    = 'KnowIT.Builder'
+    Description   = 'Module to help in the creation and building of new PowerShell Modules'
+    Version       = '0.0.x-beta'
 
-    PSSourceFiles   = 'Public', 'Private'
-    AdditionalFiles = 'Templates'
+    PSSourceFiles = 'public', 'private'
+    ExtraContent  = 'templates'
 
     Manifest = @{
         GUID              = 'd96aca93-5299-4999-bca4-2ab84d215f33'

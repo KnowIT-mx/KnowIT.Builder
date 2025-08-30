@@ -15,7 +15,7 @@ function BuildPSM ([switch]$Merge)
         $sourceBuilder = [Text.StringBuilder]::new()
         $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-        $sourceFiles = Get-ChildItem $ModuleData.PSSourceFiles -Include '*.ps1' -Recurse
+        $sourceFiles = ProcessSourceFiles
 
         [void]$sourceBuilder.AppendLine("`n#region === Source functions ===")
         foreach($source in $sourceFiles) {
@@ -53,14 +53,29 @@ function BuildPSM ([switch]$Merge)
 
         $sourceCode | Set-Content "$output/$moduleName.psm1" -Encoding utf8BOM
 
-        if($additional = $ModuleData.AdditionalFiles) {
-            Write-Build "  Copying additional files '$additional'..."
-            Copy-Item $additional -Destination $output -Recurse -Force
+        if($extra = $ModuleData.ExtraContent) {
+            Write-Build "  Copying extra content: ($($extra -join ', '))..."
+            Copy-Item $extra -Destination $output -Recurse -Force
         }
     }
     finally {
         Pop-Location
     }
+}
+
+function ProcessSourceFiles
+{
+    Write-Build "  Processing source files in folders: ($($ModuleData.PSSourceFiles -join ', '))..."
+    $publicFunctions = [Collections.ArrayList]::new()
+    foreach($path in $ModuleData.PSSourceFiles) {
+        $files = Get-ChildItem -Filter $path -Directory |
+            Get-ChildItem -Filter '*.ps1' -Recurse
+        if($path -eq 'public') {
+            [void]$publicFunctions.AddRange($files.BaseName)
+        }
+        $files
+    }
+    $ModuleData.PublicFunctions = $publicFunctions
 }
 
 filter ParseSource {
