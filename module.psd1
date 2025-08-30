@@ -5,6 +5,7 @@
 
     PSSourceFiles = 'public', 'private'
     ExtraContent  = 'templates'
+    # ExternalModules = 'PlatyPS'
 
     Manifest = @{
         GUID              = 'd96aca93-5299-4999-bca4-2ab84d215f33'

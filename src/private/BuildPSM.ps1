@@ -15,7 +15,7 @@ function BuildPSM ([switch]$Merge)
         $sourceBuilder = [Text.StringBuilder]::new()
         $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-        $sourceFiles = ProcessSourceFiles
+        $sourceFiles = ProcessSourceFolders
 
         [void]$sourceBuilder.AppendLine("`n#region === Source functions ===")
         foreach($source in $sourceFiles) {
@@ -32,14 +32,15 @@ function BuildPSM ([switch]$Merge)
             [void]$sourceBuilder.AppendLine("`n#endregion")
         }
 
-        # Header for PSM file (using directives must be at the top followed by #requires)
-        if($requires.Count -gt 0) {
-            [void]$sourceBuilder.Insert(0, "#requires -Modules $($requires -join ', ')`n")
-            Write-Build '  Writing ''requires.txt'' file...'
-            $requires | Set-Content "$output/requires.txt" -Encoding utf8BOM
-        }
+        # using directives must be at the top of the file
         if($usings.Count -gt 0) {
             [void]$sourceBuilder.Insert(0, "$($usings -join "`n")`n")
+        }
+
+        if($requires.Count -gt 0) {
+            Write-Build '  Procesing Required Modules...'
+            $ModuleData.ExternalModules.ForEach({ [void]$requires.Add($_) })
+            $ModuleData.ExternalModules = $requires
         }
 
         $sourceCode = $sourceBuilder.ToString()
@@ -63,24 +64,21 @@ function BuildPSM ([switch]$Merge)
     }
 }
 
-function ProcessSourceFiles
+function ProcessSourceFolders
 {
     Write-Build "  Processing source files in folders: ($($ModuleData.PSSourceFiles -join ', '))..."
-    $publicFunctions = [Collections.ArrayList]::new()
     foreach($path in $ModuleData.PSSourceFiles) {
         $files = Get-ChildItem -Filter $path -Directory |
             Get-ChildItem -Filter '*.ps1' -Recurse
         if($path -eq 'public') {
-            [void]$publicFunctions.AddRange($files.BaseName)
+            $ModuleData.PublicFunctions = $files.BaseName
         }
         $files
     }
-    $ModuleData.PublicFunctions = $publicFunctions
 }
 
-filter ParseSource {
-    param($Builder, $Usings, $Requires, $SkipRegion)
-
+filter ParseSource ($Builder, $Usings, $Requires, $SkipRegion)
+{
 begin {
     $skipPattern = [string]::IsNullOrWhiteSpace($SkipRegion) ?
         '^#region\ SKIP_BUILD' :
@@ -88,6 +86,7 @@ begin {
     $skipping = $false
     $lineNumber = 0
 }
+
 process {
     $lineNumber++
     switch -Regex ($_) {
