@@ -22,7 +22,7 @@ function BuildManifest ([int]$BuildNumber = -1) {
     else {
         $fullVersion = $buildVersion
     }
-    Write-Build "Module final version: v$fullVersion"
+    Write-Build "Module final version: [$fullVersion]"
     $manifest.PrivateData.FullVersion = $fullVersion
 
     $manifest.RootModule = "$moduleName.psm1"
@@ -42,26 +42,3 @@ function BuildManifest ([int]$BuildNumber = -1) {
     Write-Debug ($manifest | Out-String)
     New-ModuleManifest @manifest
 }
-
-function GetBuildVersion ([string]$Version, [int]$BuildNumber = -1)
-{
-    if(!$Version.Contains('x')) {
-        return [version]$Version
-    }
-
-    Write-Build '  Applying Build Version...'
-    if($Version -notmatch '^(?:\d+\.)*\d+(\.x)?$') {
-        throw "Only the last segment in version is allowed to contain '.x' for build number."
-    }
-
-    if($BuildNumber -eq -1) {
-        $BuildNumber = [Math]::Floor([DateTimeOffset]::Now.ToUnixTimeSeconds() / 60)
-        Write-Build "  [-] Build Number: '$BuildNumber' (UnixMinutes)"
-    }
-    else {
-        Write-Build "  [-] Build Number: '$BuildNumber' (Parameters)"
-    }
-    $Version = $Version.TrimEnd('x') + $BuildNumber
-    [version]$Version
-}
-

@@ -8,17 +8,18 @@ function Get-KnowITModuleInfo {
 
     try {
         $rootFolder = Convert-Path $Path
-        $buildModuleFile = Join-Path $rootFolder 'module.psd1'
+        $moduleFile = Join-Path $rootFolder 'module.psd1'
 
-        if(!(Test-Path $buildModuleFile -PathType Leaf)) {
+        if(!(Test-Path $moduleFile -PathType Leaf)) {
             throw "Not found 'module.psd1' file in project folder [$rootFolder]"
         }
 
-        $data = Import-PowerShellDataFile $buildModuleFile -ErrorAction Stop
+        $data = Import-PowerShellDataFile $moduleFile -ErrorAction Stop
         $data.ProjectFolder = $rootFolder
         $outDir = $data.OutputFolder ?? 'out'
         $data.OutputFolder = Join-Path $rootFolder $outDir $data.ModuleName
         $data
+        $null = ValidateVersion $data.Version
     }
     catch {
         Write-Error $_

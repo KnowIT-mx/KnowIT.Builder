@@ -1,0 +1,9 @@
+# Building artifacts and stage folders
+bin
+obj
+artifacts
+stage
+out
+
+# Local environment files
+.env

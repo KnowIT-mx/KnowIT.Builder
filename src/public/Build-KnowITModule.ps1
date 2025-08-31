@@ -4,6 +4,7 @@
     [Alias('build')]
     param(
         [Parameter(ParameterSetName = 'Version')]
+        [ValidateScript({ ValidateVersion $_ })]
         [string]$Version,
 
         [Parameter(ParameterSetName = 'BuildNumber')]
@@ -15,9 +16,14 @@
     $ErrorActionPreference = 'Stop'
 
     try {
+        Write-Build 'Procesing module data file...'
         $script:ModuleData = Get-KnowITModuleInfo
-
         #TODO: Quiboles con el GUID
+        if($Version) {
+            $ModuleData.Version = $Version
+        }
+
+        Write-Build "Module output location: '$($ModuleData.OutputFolder)'"
         BuildPSM -Merge:$MergePSM
         BuildManifest $BuildNumber
     }

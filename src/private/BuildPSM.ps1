@@ -2,15 +2,13 @@ function BuildPSM ([switch]$Merge)
 {
     $ErrorActionPreference = 'Stop'
 
-    $moduleName = $ModuleData.ModuleName
-    $output = $ModuleData.OutputFolder
-
-    Write-Build "Module output location: [$output]"
-    $null = New-Item $output -ItemType Directory -Force
-
     try {
+        $moduleName = $ModuleData.ModuleName
         Write-Build "  Building module file: '$moduleName.psm1'..."
         Push-Location (Join-Path $ModuleData.ProjectFolder 'src')
+
+        $output = $ModuleData.OutputFolder
+        $null = New-Item $output -ItemType Directory -Force
 
         $sourceBuilder = [Text.StringBuilder]::new()
         $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
