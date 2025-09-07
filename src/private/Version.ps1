@@ -1,9 +1,10 @@
 ﻿function ValidateVersion ([string]$Version)
 {
-    $regex = '^(0|[1-9]\d*)(\.(0|[1-9]\d*))?\.(?:x|X|0|[1-9]\d*)(?:-[A-Za-z0-9.]+)?$'
+    $regex = '^(0|[1-9]\d*)(\.(0|[1-9]\d*))?\.(?:x|X|0|[1-9]\d*)(?:-[A-Za-z0-9]+)?$'
 
     if($Version -notmatch $regex) {
-        throw 'Invalid version format. Please use ''Major[.Minor].Build'' and an optional prerelease. Last segment can be ''x'' to indicate an incremental build number.'
+        throw "Invalid version format ($Version). Please use 'Major[.Minor].Build' and an optional prerelease (only alphanumeric characters).
+Last segment can be 'x' to indicate an incremental build number."
     }
     return $true
 }
