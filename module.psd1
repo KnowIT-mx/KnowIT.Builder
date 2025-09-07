@@ -1,22 +1,21 @@
 ﻿@{
     ModuleName    = 'KnowIT.Builder'
+    ModuleId      = 'd96aca93-5299-4999-bca4-2ab84d215f33'
     Description   = 'Module to help in the creation and building of new PowerShell Modules'
-    Version       = '0.0.x-beta'
+    Author        = 'José Ramón Aguilar'
+    Version       = '0.1.x-beta'
 
     PSSourceFiles = 'public', 'private'
     ExtraContent  = 'templates'
     # ExternalModules = 'PlatyPS'
 
+    # Optional Manifest parameters
     Manifest = @{
-        GUID              = 'd96aca93-5299-4999-bca4-2ab84d215f33'
-        Author            = 'José Ramón Aguilar'
-        CompanyName       = 'KnowIT'
+        Tags              = 'Build', 'Development'
+        CompanyName       = 'KnowIT Soluciones'
         Copyright         = '(c) 2025 KnowIT Soluciones'
         ProjectUri        = 'https://github.com/JoseRa-KnowIT/KnowIT.Builder'
         PowerShellVersion = 7.2
-        PrivateData = @{
-            Builder = 'KnowIT'
-        }
     }
 }
 

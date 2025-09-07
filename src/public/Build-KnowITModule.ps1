@@ -3,6 +3,10 @@
     [CmdletBinding(DefaultParameterSetName = 'BuildNumber')]
     [Alias('build')]
     param(
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrWhiteSpace()]
+        [string]$Path = '.',
+
         [Parameter(ParameterSetName = 'Version')]
         [ValidateScript({ ValidateVersion $_ })]
         [string]$Version,
@@ -17,10 +21,13 @@
 
     try {
         Write-Build 'Procesing module data file...'
-        $script:ModuleData = Get-KnowITModuleInfo
+        $script:ModuleData = GetModuleFileData $Path
 
         if($Version) {
             $ModuleData.Version = $Version
+        }
+        else {
+            $null = ValidateVersion $ModuleData.Version
         }
         Write-Build "Module output location: '$($ModuleData.OutputFolder)'"
         BuildPSM -Merge:$MergePSM

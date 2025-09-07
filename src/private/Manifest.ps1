@@ -24,9 +24,12 @@ function BuildManifest ([int]$BuildNumber = -1) {
     }
     Write-Build "Module final version: [$fullVersion]"
     $manifest.PrivateData.FullVersion = $fullVersion
+    $manifest.PrivateData.Builder = 'KnowIT.Builder'
 
-    $manifest.RootModule = "$moduleName.psm1"
+    $manifest.GUID = $ModuleData.ModuleId
+    $manifest.Author = $ModuleData.Author
     $manifest.Description = $ModuleData.Description
+    $manifest.RootModule = "$moduleName.psm1"
 
     $manifest.FunctionsToExport = $ModuleData.PublicFunctions
     if($ModuleData.ExternalModules) {
