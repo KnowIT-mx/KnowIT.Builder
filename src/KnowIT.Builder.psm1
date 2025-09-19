@@ -6,3 +6,9 @@ foreach($scriptFile in Get-ChildItem $sourceFolders -Include '*.ps1' -Recurse) {
     . $scriptFile.FullName
 }
 #endregion
+
+#region === Module initialization ===
+
+$script:PSModuleRoot = $PSScriptRoot
+
+#endregion

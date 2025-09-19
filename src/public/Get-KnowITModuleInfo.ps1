@@ -1,10 +1,13 @@
 
 function Get-KnowITModuleInfo {
 
+    [CmdletBinding()]
     [Alias('moduleinfo')]
     param(
         [string]$Path = '.'
     )
+
+    $ErrorActionPreference = 'Stop'
 
     try {
         $rootFolder = Convert-Path $Path
@@ -14,6 +17,6 @@ function Get-KnowITModuleInfo {
         $null = ValidateVersion $data.Version
     }
     catch {
-        Write-Error $_
+        $PSCmdlet.WriteError($_)
     }
 }

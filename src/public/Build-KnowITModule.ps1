@@ -29,11 +29,16 @@
         else {
             $null = ValidateVersion $ModuleData.Version
         }
-        Write-Build "Module output location: '$($ModuleData.OutputFolder)'"
+
+        $output = $ModuleData.OutputFolder
+        Write-Build "Module output location: '$output'"
+        if(Test-Path $output) {
+            $null = Remove-Item $output -Recurse -Force
+        }
         BuildPSM -Merge:$MergePSM
         BuildManifest $BuildNumber
     }
     catch {
-        Write-Error $_
+        $PSCmdlet.WriteError($_)
     }
 }

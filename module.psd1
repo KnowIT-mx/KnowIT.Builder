@@ -6,7 +6,7 @@
     Version       = '0.1.x-beta'
 
     PSSourceFiles = 'public', 'private'
-    ExtraContent  = 'templates'
+    ExtraContent  = 'template'
     # ExternalModules = 'PlatyPS'
 
     # Optional Manifest parameters

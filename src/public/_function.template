@@ -1,0 +1,16 @@
+﻿function {{FunctionName}} {
+
+    [CmdletBinding()]
+    param(
+
+    )
+
+    $ErrorActionPreference = 'Stop'
+
+    try {
+
+    }
+    catch {
+        $PSCmdlet.WriteError($_)
+    }
+}
