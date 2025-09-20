@@ -10,7 +10,7 @@
     $ErrorActionPreference = 'Stop'
 
     try {
-        $moduleData = GetModuleFileData .
+        $moduleData = GetModuleFileData (FindProjectRoot)
         $functionFile = Join-Path $moduleData.ProjectFolder 'src/public' "$Name.ps1"
         if(Test-Path $functionFile) {
             throw "Function file '$Name.ps1' already exists!"

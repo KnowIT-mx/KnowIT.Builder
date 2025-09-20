@@ -22,3 +22,36 @@ function GetModuleFileData ([string]$RootFolder)
 
     $data
 }
+
+function FindProjectRoot
+{
+    if(Test-Path 'module.psd1') {
+        return $PWD.Path
+    }
+    $current = $PWD.Path
+    while ($current) {
+        if((Split-Path $current -Leaf) -eq 'src') {
+           return Split-Path $current
+        }
+        $current = Split-Path $current
+    }
+
+    throw 'Project Root Folder not found!'
+}
+
+function ReplaceModuleData ([string]$Content, [hashtable]$Data)
+{
+    $Content -replace '(\w+\s*)=\s*(.+)', {
+        $key = $_.Groups[1].Value.Trim()
+        if(!$Data.ContainsKey($key) -or $_.Groups[2].Value -eq '@{') {
+            return $_.Value
+        }
+
+        $value = switch ($Data[$key]) {
+            { $_ -is [int] -or $_ -is [double] } { $_ }
+            { $_ -is [bool] } { $_ ? '$true' : '$false' }
+            default { "'$_'" }
+        }
+        '{0}= {1}' -f $_.Groups[1].Value, ($value -join ', ')
+   }
+}
