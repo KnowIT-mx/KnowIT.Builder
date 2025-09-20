@@ -1,1 +1,1 @@
-﻿Import-Module ./src/KnowIT.Builder.psm1 -Force -DisableNameChecking
+﻿Import-Module $PSScriptRoot/src/KnowIT.Builder.psm1 -Force -DisableNameChecking
