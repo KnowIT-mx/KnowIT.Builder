@@ -11,11 +11,11 @@
 
     # Optional Manifest parameters
     Manifest = @{
-        Tags              = @()
+        # Tags              = @()
         CompanyName       = 'KnowIT Soluciones'
         Copyright         = '(c) 2025 KnowIT Soluciones'
-        ProjectUri        = ''
-        LicenseUri        = ''
+        # ProjectUri        = ''
+        # LicenseUri        = ''
         PowerShellVersion = 7.4
     }
 }

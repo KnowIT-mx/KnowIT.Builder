@@ -5,11 +5,15 @@ function BuildManifest ([int]$BuildNumber = -1) {
 
     $manifest = $ModuleData.Manifest
     $allowedParams = (Get-Command New-ModuleManifest).Parameters.Keys
-    $invalidKeys = $manifest.Keys.Where({ $_ -notin $allowedParams })
+    $invalidKeys = $manifest.Keys.Where({ $_ -notin $allowedParams -or !$manifest[$_] })
     if($invalidKeys.Count -gt 0) {
-        Write-Warning "Found invalid keys in Manifest: ($($invalidKeys -join ', '))"
+        Write-Warning "  Removing invalid or empty keys in Manifest ($($invalidKeys -join ', '))..."
         $invalidKeys.ForEach({ $manifest.Remove($_) })
     }
+    # Manifest default values
+    $manifest.FunctionsToExport = ''
+    $manifest.CmdletsToExport = ''
+    $manifest.VariablesToExport = ''
     $manifest.PrivateData ??= @{}
 
     $version, $prerelease = $ModuleData.Version.Split('-', 2)
@@ -31,7 +35,9 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.Description = $ModuleData.Description
     $manifest.RootModule = "$moduleName.psm1"
 
-    $manifest.FunctionsToExport = $ModuleData.PublicFunctions
+    if($ModuleData.PublicFunctions) {
+        $manifest.FunctionsToExport = $ModuleData.PublicFunctions
+    }
     if($ModuleData.ExternalModules) {
         $manifest.RequiredModules = $ModuleData.ExternalModules
         $manifest.ExternalModuleDependencies = $ModuleData.ExternalModules

@@ -39,9 +39,9 @@ function FindProjectRoot
     throw 'Project Root Folder not found!'
 }
 
-function ReplaceModuleData ([string]$Content, [hashtable]$Data)
+function ReplaceModuleData ([string[]]$Content, [hashtable]$Data)
 {
-    $Content -replace '(\w+\s*)=\s*(.+)', {
+    $Content -replace '(?:\#+\s*)?(\w+\s*)=\s*(.+)', {
         $key = $_.Groups[1].Value.Trim()
         if(!$Data.ContainsKey($key) -or $_.Groups[2].Value -eq '@{') {
             return $_.Value
