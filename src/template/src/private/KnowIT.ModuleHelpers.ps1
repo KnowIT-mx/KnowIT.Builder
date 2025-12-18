@@ -9,11 +9,13 @@
     )
 
     $commonParameters = 'ErrorAction', 'Warning', 'Verbose', 'Debug', 'Information', 'Progress', 'Confirm', 'WhatIf'
-    $currentDebugPreference = $DebugPreference
 
-    Write-Debug "Updating [$($ScriptCmdlet.MyInvocation.MyCommand)] Preference variables:"
+    $invocation = $ScriptCmdlet.MyInvocation
+    $commandDebug = $invocation.BoundParameters.ContainsKey('Debug')
+
+    Write-Debug "Updating [$($invocation.MyCommand)] Preference variables:" -Debug:$commandDebug
     foreach($p in $commonParameters) {
-        if($ScriptCmdlet.MyInvocation.BoundParameters.ContainsKey($p)) {
+        if($invocation.BoundParameters.ContainsKey($p)) {
             continue
         }
         $var = "${p}Preference"
@@ -30,7 +32,7 @@
             $val = $ScriptCmdlet.GetVariableValue($var)
             $scope = 'Caller'
         }
-        Write-Debug "  (From $scope scope) $var = $val " -Debug:$currentDebugPreference
+        Write-Debug "  (From $scope scope) $var = $val " -Debug:$commandDebug
         Set-Variable -Scope 1 -Name $var -Value $val
     }
 }
