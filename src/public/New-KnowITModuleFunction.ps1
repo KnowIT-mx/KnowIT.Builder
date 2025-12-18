@@ -26,6 +26,15 @@
             Set-Content $functionFile -Encoding utf8BOM
 
         Write-Build "New public function file created: $functionFile"
+
+        if($env:TERM_PROGRAM -eq 'vscode') {
+            if($env:TERM_PROGRAM_VERSION -like '*-insider') {
+                code-insiders -r $functionFile
+            }
+            else {
+                code -r $functionFile
+            }
+        }
     }
     catch {
         $PSCmdlet.WriteError($_)
