@@ -6,6 +6,7 @@
     Version       = '0.2.x-prerelease'
 
     PSSourceFiles = 'public', 'private'
+    MergePSM      = $true
     ExtraContent  = 'template'
     # ExternalModules = 'PlatyPS'
 

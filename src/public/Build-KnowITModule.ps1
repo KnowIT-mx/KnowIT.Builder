@@ -35,7 +35,10 @@
         if(Test-Path $output) {
             $null = Remove-Item $output -Recurse -Force
         }
-        BuildPSM -Merge:$MergePSM
+        if($PSBoundParameters.ContainsKey('MergePSM')) {
+            $ModuleData.MergePSM = $MergePSM.IsPresent
+        }
+        BuildPSM 
         BuildManifest $BuildNumber
     }
     catch {

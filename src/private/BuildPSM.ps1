@@ -1,4 +1,4 @@
-function BuildPSM ([switch]$Merge)
+function BuildPSM
 {
     $ErrorActionPreference = 'Stop'
 
@@ -23,7 +23,7 @@ function BuildPSM ([switch]$Merge)
         [void]$sourceBuilder.AppendLine("`n#endregion")
 
         $currentPSM = "$moduleName.psm1"
-        if($Merge -and (Test-Path $currentPSM)) {
+        if($ModuleData.MergePSM -and (Test-Path $currentPSM)) {
             Write-Build '  Merging current PSM file...'
             [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
             Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
