@@ -18,7 +18,7 @@ function GetModuleFileData ([string]$RootFolder)
 
     $data.ProjectFolder = $RootFolder
     $outDir = $data.OutputFolder ?? 'out'
-    $data.OutputFolder = Join-Path $RootFolder $outDir $data.ModuleName -Resolve
+    $data.OutputFolder = [IO.Path]::GetFullPath([IO.Path]::Combine($RootFolder, $outDir, $data.ModuleName))
 
     $data
 }
