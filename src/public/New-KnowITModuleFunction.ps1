@@ -10,14 +10,19 @@
     $ErrorActionPreference = 'Stop'
 
     try {
-        $moduleData = GetModuleFileData (FindProjectRoot)
-        $functionFile = Join-Path $moduleData.ProjectFolder 'src/public' "$Name.ps1"
+        $moduleData = GetModuleFileData
+        $srcFolder = Join-Path $moduleData.ProjectFolder 'src'
+        if(!(Test-Path $srcFolder -PathType Container)) {
+            $srcFolder = $moduleData.ProjectFolder
+        }
+        $functionFile = Join-Path $srcFolder 'public' "$Name.ps1"
         if(Test-Path $functionFile) {
             throw "Function file '$Name.ps1' already exists!"
         }
 
-        $templateFile = Join-Path $moduleData.ProjectFolder 'src/public/_function.template'
+        $templateFile = Join-Path $srcFolder 'public/_function.template'
         if(!(Test-Path $templateFile)) {
+            Write-Debug 'No existing template in current module, using default template.'
             $templateFile = Join-Path $PSModuleRoot 'template/src/public/_function.template'
         }
 

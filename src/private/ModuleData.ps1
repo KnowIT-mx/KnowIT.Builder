@@ -2,7 +2,7 @@ function GetModuleFileData ([string]$RootFolder)
 {
     $ErrorActionPreference = 'Stop'
 
-    $RootFolder = Convert-Path $RootFolder
+    $RootFolder = $RootFolder ? (Convert-Path $RootFolder) : (FindProjectRoot)
     $moduleFile = Join-Path $RootFolder 'module.psd1'
 
     if(!(Test-Path $moduleFile -PathType Leaf)) {
@@ -25,13 +25,12 @@ function GetModuleFileData ([string]$RootFolder)
 
 function FindProjectRoot
 {
-    if(Test-Path 'module.psd1') {
-        return $PWD.Path
-    }
     $current = $PWD.Path
+    Write-Debug 'Checkin folders for project root:'
     while ($current) {
-        if((Split-Path $current -Leaf) -eq 'src') {
-           return Split-Path $current
+        Write-Debug "  $current"
+        if(Test-Path "$current/module.psd1") {
+            return $current
         }
         $current = Split-Path $current
     }

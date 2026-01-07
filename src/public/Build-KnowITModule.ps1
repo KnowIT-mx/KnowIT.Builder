@@ -5,7 +5,7 @@
     param(
         [Parameter(Position = 0)]
         [ValidateNotNullOrWhiteSpace()]
-        [string]$Path = '.',
+        [string]$Path,
 
         [Parameter(ParameterSetName = 'Version')]
         [ValidateScript({ ValidateVersion $_ })]
@@ -38,7 +38,7 @@
         if($PSBoundParameters.ContainsKey('MergePSM')) {
             $ModuleData.MergePSM = $MergePSM.IsPresent
         }
-        BuildPSM 
+        BuildPSM
         BuildManifest $BuildNumber
     }
     catch {

@@ -4,15 +4,13 @@ function Get-KnowITModuleInfo {
     [CmdletBinding()]
     [Alias('moduleinfo')]
     param(
-        [string]$Path = '.'
+        [string]$Path
     )
 
     $ErrorActionPreference = 'Stop'
 
     try {
-        $rootFolder = Convert-Path $Path
-
-        $data = GetModuleFileData $rootFolder
+        $data = GetModuleFileData $Path
         [PSCustomObject]$data
         $null = ValidateVersion $data.Version
     }

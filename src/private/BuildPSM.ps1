@@ -5,7 +5,10 @@ function BuildPSM
     try {
         $moduleName = $ModuleData.ModuleName
         Write-Build "  Building module file: '$moduleName.psm1'..."
-        Push-Location (Join-Path $ModuleData.ProjectFolder 'src')
+        Push-Location $ModuleData.ProjectFolder
+        if(Test-Path src -PathType Container) {
+            Set-Location src
+        }
 
         $output = $ModuleData.OutputFolder
         $null = New-Item $output -ItemType Directory -Force
@@ -22,9 +25,9 @@ function BuildPSM
         }
         [void]$sourceBuilder.AppendLine("`n#endregion")
 
-        $currentPSM = "$moduleName.psm1"
-        if($ModuleData.MergePSM -and (Test-Path $currentPSM)) {
-            Write-Build '  Merging current PSM file...'
+        if($ModuleData.MergePSM) {
+            $currentPSM = FindCurrentPSM
+            Write-Build "  Merging '$currentPSM' file..."
             [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
             Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
             [void]$sourceBuilder.AppendLine("`n#endregion")
@@ -60,6 +63,23 @@ function BuildPSM
     finally {
         Pop-Location
     }
+}
+
+function FindCurrentPSM
+{
+    $psm = "$moduleName.psm1"
+    if(Test-Path $psm -PathType Leaf) {
+        return $psm
+    }
+
+    $files = Get-Item *.psm1
+    if(!$files) {
+        throw 'No existing .psm1 file found!'
+    }
+    if($files.Count -gt 1) {
+        throw "Found $($files.Count) .psm1 files! Can't merge multiple files."
+    }
+    return $files.Name
 }
 
 function ProcessSourceFolders
