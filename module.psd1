@@ -3,10 +3,10 @@
     ModuleId      = 'd96aca93-5299-4999-bca4-2ab84d215f33'
     Description   = 'Module to help in the creation and building of new PowerShell Modules'
     Author        = 'José Ramón Aguilar'
-    Version       = '0.2.x-prerelease'
+    Version       = '0.4.x-prerelease'
 
-    PSSourceFiles = 'public', 'private'
     MergePSM      = $true
+    PSSourceFiles = 'public', 'private'
     ExtraContent  = 'template'
     # ExternalModules = 'PlatyPS'
 

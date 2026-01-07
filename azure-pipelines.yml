@@ -1,0 +1,35 @@
+name: $(Date:yyMM)$(Rev:rrr)
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - '**/*.md'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: BuildAndPublish
+  displayName: Build Module and publish to PSGallery
+
+  variables:
+  - group: PSGallery
+
+  steps:
+  - pwsh: |
+      $PSVersionTable
+      ./build.ps1 -BuildNumber $(Build.BuildNumber)
+    displayName: Build Module
+
+  # - publish: ./out/
+
+  - pwsh: |
+      Import-Module Microsoft.PowerShell.PSResourceGet -PassThru
+      Get-PSResourceRepository
+      Publish-PSResource -Path ./out/KnowIT.Builder -Repository PSGallery -ApiKey $env:PSGallery_ApiKey -Verbose
+    env:
+      PSGallery_ApiKey: $(PSGallery.ApiKey)
+    displayName: Publish to PSGallery
