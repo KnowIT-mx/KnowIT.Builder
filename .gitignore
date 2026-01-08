@@ -4,3 +4,5 @@ artifacts
 stage
 out
 .env
+env.ps1
+**/*sandbox.*
