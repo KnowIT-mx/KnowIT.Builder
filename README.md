@@ -2,7 +2,10 @@
 
 A PowerShell module designed to standardize and simplify the development of PowerShell modules within KnowIT.
 
+> 🚧 This module is in **early stage** of development.
+
 ## 📋 Overview
+
 
 KnowIT.Builder provides the commands and functions necessary to:
 
@@ -18,23 +21,27 @@ The purpose is to ensure consistency, quality, and maintainability across all mo
 Creates a new PowerShell module with standardized base structure.
 
 ```pwsh
-New-KnowITModule -Name "KnowIT.NewModule" -Path "C:\repos\Modules"
+PS> New-KnowITModule -Name KnowIT.NewModule -Path C:\repos\Modules
 ```
 
 ### New-KnowITModuleFunction
 Generates a new function within a module, applying predefined templates.
 
 ```pwsh
-New-KnowITModuleFunction -Name "Get-KnowITData"
-# Alias: nfunc
+PS> New-KnowITModuleFunction -Name Get-KnowITData
+
+# or with alias:
+PS> nfunc GetKnowITData
 ```
 
 ### Build-KnowITModule
-Compiles and packages the module, validating structure and versions.
+Compiles and packages the module, using versioning configured in the manifest.
 
 ```pwsh
-Build-KnowITModule -Version "1.0.0"
-# Alias: build
+PS> Build-KnowITModule
+
+# or with alias
+PS> build
 ```
 
 ## 📦 Requirements

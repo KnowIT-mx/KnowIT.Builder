@@ -5,8 +5,9 @@ trigger:
     include:
     - master
   paths:
-    exclude:
-    - '**/*.md'
+    include:
+    - src
+    - module.psd1
 
 pool:
   vmImage: 'ubuntu-latest'
