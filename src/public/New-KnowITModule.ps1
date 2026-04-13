@@ -28,9 +28,6 @@
         ReplaceModuleData $moduleFileContent $moduleData
         | Set-Content $modulePath/module.psd1 -Encoding utf8BOM -Force
 
-        "Import-Module `$PSScriptRoot/src/$Name.psm1 -Force -DisableNameChecking"
-        | Set-Content $modulePath/run.ps1 -Encoding utf8BOM
-
         $gitCommand = Get-Command git -CommandType Application -ErrorAction Ignore
         if($gitCommand -and !$SkipGitInit) {
             Push-Location $modulePath
