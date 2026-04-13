@@ -29,19 +29,36 @@
         else {
             $null = ValidateVersion $ModuleData.Version
         }
+        if($PSBoundParameters.ContainsKey('MergePSM')) {
+            $script:ModuleData.MergePSM = $MergePSM.IsPresent
+        }
 
+        Push-Location $ModuleData.ProjectFolder
+        if(Test-Path src -PathType Container) {
+            Set-Location src
+        }
         $output = $ModuleData.OutputFolder
         Write-Build "Module output location: '$output'"
         if(Test-Path $output) {
             $null = Remove-Item $output -Recurse -Force
         }
-        if($PSBoundParameters.ContainsKey('MergePSM')) {
-            $ModuleData.MergePSM = $MergePSM.IsPresent
+
+        $sourceFiles = ProcessSourceFolders
+        BuildPSM $sourceFiles
+        $script:ModuleData.PublicFunctions = $sourceFiles.PublicFunctions
+        $script:ModuleData.Aliases = $sourceFiles.Aliases
+
+        if($extra = $ModuleData.ExtraContent) {
+            Write-Build "  Copying extra content: ($($extra -join ', '))..."
+            Copy-Item $extra -Destination $output -Recurse -Force
         }
-        BuildPSM
+
         BuildManifest $BuildNumber
     }
     catch {
         $PSCmdlet.WriteError($_)
+    }
+    finally {
+        Pop-Location
     }
 }

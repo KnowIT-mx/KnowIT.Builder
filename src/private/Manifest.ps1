@@ -11,7 +11,6 @@ function BuildManifest ([int]$BuildNumber = -1) {
         $invalidKeys.ForEach({ $manifest.Remove($_) })
     }
     # Manifest default values
-    $manifest.FunctionsToExport = ''
     $manifest.CmdletsToExport = ''
     $manifest.VariablesToExport = ''
     $manifest.PrivateData ??= @{}
@@ -34,10 +33,10 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.Author = $ModuleData.Author
     $manifest.Description = $ModuleData.Description
     $manifest.RootModule = "$moduleName.psm1"
+    $manifest.FunctionsToExport = $ModuleData.PublicFunctions
+    $manifest.AliasesToExport = $ModuleData.Aliases
 
-    if($ModuleData.PublicFunctions) {
-        $manifest.FunctionsToExport = $ModuleData.PublicFunctions
-    }
+    #TODO: Add Exported Aliases
     if($ModuleData.ExternalModules) {
         $manifest.RequiredModules = $ModuleData.ExternalModules
         $manifest.ExternalModuleDependencies = $ModuleData.ExternalModules

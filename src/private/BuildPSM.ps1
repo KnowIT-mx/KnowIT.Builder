@@ -1,99 +1,61 @@
-function BuildPSM
+function BuildPSM ($SourceFiles)
 {
     $ErrorActionPreference = 'Stop'
 
-    try {
-        $moduleName = $ModuleData.ModuleName
-        Write-Build "  Building module file: '$moduleName.psm1'..."
-        Push-Location $ModuleData.ProjectFolder
-        if(Test-Path src -PathType Container) {
-            Set-Location src
-        }
+    $moduleName = $ModuleData.ModuleName
+    $output = $ModuleData.OutputFolder
+    Write-Build "  Building module file: '$moduleName.psm1'..."
+    $null = New-Item $output -ItemType Directory -Force
 
-        $output = $ModuleData.OutputFolder
-        $null = New-Item $output -ItemType Directory -Force
+    $sourceBuilder = [Text.StringBuilder]::new()
+    $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
-        $sourceBuilder = [Text.StringBuilder]::new()
-        $usings = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-        $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-        $sourceFiles = ProcessSourceFolders
+    [void]$sourceBuilder.AppendLine("`n#region === Public functions ===")
+    foreach($source in $SourceFiles.Public) {
+        [void]$sourceBuilder.AppendLine("`n### Source file: '$($source.Name)' ###")
+        Get-Content $source | ParseSource $sourceBuilder $usings $requires
+    }
+    [void]$sourceBuilder.AppendLine("`n#endregion")
 
-        [void]$sourceBuilder.AppendLine("`n#region === Source functions ===")
-        foreach($source in $sourceFiles) {
-            [void]$sourceBuilder.AppendLine("`n### Source file: '$($source.Name)' ###")
-            Get-Content $source | ParseSource $sourceBuilder $usings $requires
-        }
+    [void]$sourceBuilder.AppendLine("`n#region === Private functions ===")
+    foreach($source in $SourceFiles.Private) {
+        [void]$sourceBuilder.AppendLine("`n### Source file: '$($source.Name)' ###")
+        Get-Content $source | ParseSource $sourceBuilder $usings $requires
+    }
+    [void]$sourceBuilder.AppendLine("`n#endregion")
+
+    if($ModuleData.MergePSM) {
+        $currentPSM = FindCurrentPSM
+        Write-Build "  Merging '$currentPSM' file..."
+        [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
+        Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
         [void]$sourceBuilder.AppendLine("`n#endregion")
-
-        if($ModuleData.MergePSM) {
-            $currentPSM = FindCurrentPSM
-            Write-Build "  Merging '$currentPSM' file..."
-            [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
-            Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
-            [void]$sourceBuilder.AppendLine("`n#endregion")
-        }
-
-        # using directives must be at the top of the file
-        if($usings.Count -gt 0) {
-            [void]$sourceBuilder.Insert(0, "$($usings -join "`n")`n")
-        }
-
-        if($requires.Count -gt 0) {
-            Write-Build '  Procesing Required Modules...'
-            $ModuleData.ExternalModules.ForEach({ [void]$requires.Add($_) })
-            $ModuleData.ExternalModules = $requires
-        }
-
-        $sourceCode = $sourceBuilder.ToString()
-
-        #TODO:External help
-        if($script:HelpFile) {
-            $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
-            $externalHelp = "# .ExternalHelp $ModuleName-help.xml`n"
-            $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
-        }
-
-        $sourceCode | Set-Content "$output/$moduleName.psm1" -Encoding utf8BOM
-
-        if($extra = $ModuleData.ExtraContent) {
-            Write-Build "  Copying extra content: ($($extra -join ', '))..."
-            Copy-Item $extra -Destination $output -Recurse -Force
-        }
     }
-    finally {
-        Pop-Location
+
+    # using directives must be at the top of the file
+    if($usings.Count -gt 0) {
+        [void]$sourceBuilder.Insert(0, "$($usings -join "`n")`n")
     }
+
+    if($requires.Count -gt 0) {
+        Write-Build '  Procesing Required Modules...'
+        $ModuleData.ExternalModules.ForEach({ [void]$requires.Add($_) })
+        $ModuleData.ExternalModules = $requires
+    }
+
+    $sourceCode = $sourceBuilder.ToString()
+
+    #TODO:External help
+    if($script:HelpFile) {
+        $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
+        $externalHelp = "# .ExternalHelp $ModuleName-help.xml`n"
+        $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
+    }
+
+    $sourceCode | Set-Content "$output/$moduleName.psm1" -Encoding utf8BOM
 }
 
-function FindCurrentPSM
-{
-    $psm = "$moduleName.psm1"
-    if(Test-Path $psm -PathType Leaf) {
-        return $psm
-    }
-
-    $files = Get-Item *.psm1
-    if(!$files) {
-        throw 'No existing .psm1 file found!'
-    }
-    if($files.Count -gt 1) {
-        throw "Found $($files.Count) .psm1 files! Can't merge multiple files."
-    }
-    return $files.Name
-}
-
-function ProcessSourceFolders
-{
-    Write-Build "  Processing source files in folders: ($($ModuleData.PSSourceFiles -join ', '))..."
-    foreach($path in $ModuleData.PSSourceFiles) {
-        $files = Get-ChildItem -Filter $path -Directory |
-            Get-ChildItem -Filter '*.ps1' -Recurse
-        if($path -eq 'public') {
-            $ModuleData.PublicFunctions = $files.BaseName
-        }
-        $files
-    }
-}
 
 filter ParseSource ($Builder, $Usings, $Requires, $SkipRegion)
 {
