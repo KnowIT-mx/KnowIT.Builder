@@ -40,7 +40,7 @@ function FindProjectRoot
 
 function ReplaceModuleData ([string[]]$Content, [hashtable]$Data)
 {
-    $Content -replace '(?:\#+\s*)?(\w+\s*)=\s*(.+)', {
+    $Content -replace 'KnowIT.Module', $Data.ModuleName -replace '(?:\#+\s*)?(\w+\s*)=\s*(.+)', {
         $key = $_.Groups[1].Value.Trim()
         if(!$Data.ContainsKey($key) -or $_.Groups[2].Value -eq '@{') {
             return $_.Value

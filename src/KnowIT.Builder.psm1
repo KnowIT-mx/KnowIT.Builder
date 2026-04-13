@@ -1,4 +1,7 @@
-﻿#region === .Source files ===
+﻿#using namespace System.Management.Automation
+#norequires -Modules CimCmdlets
+
+#region === .Source files ===
 $moduleData = Import-PowerShellDataFile $PSScriptRoot/../module.psd1
 $sourceFolders = $moduleData.PSSourceFiles.ForEach({ Join-Path $PSScriptRoot $_ })
 foreach($scriptFile in Get-ChildItem $sourceFolders -Include '*.ps1' -Recurse) {

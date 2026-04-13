@@ -6,17 +6,19 @@
     Version       = '0.0.1-beta'
 
     PSSourceFiles = 'public', 'private'
-    ExtraContent  = ''
+    ExtraContent  = '*.ps1xml'
     ExternalModules = ''
 
     # Optional Manifest parameters
     Manifest = @{
-        # Tags              = @()
+        PowerShellVersion = 7.4
+        # FormatsToProcess  = 'KnowIT.Module.Format.ps1xml'
+        # TypesToProcess    = 'KnowIT.Module.Types.ps1xml'
         CompanyName       = 'KnowIT Soluciones'
-        Copyright         = '(c) 2025 KnowIT Soluciones'
+        Copyright         = '(c) 2026 KnowIT Soluciones'
         # ProjectUri        = ''
         # LicenseUri        = ''
-        PowerShellVersion = 7.4
+        # Tags              = @()
     }
 }
 
