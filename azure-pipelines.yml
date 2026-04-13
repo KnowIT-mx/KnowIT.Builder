@@ -10,27 +10,38 @@ trigger:
     - module.psd1
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
+
+variables:
+  ModuleName: KnowIT.Builder
 
 jobs:
 - job: BuildAndPublish
   displayName: Build Module and publish to PSGallery
 
   variables:
-  - group: PSGallery
+  - group: KnowITPS
 
   steps:
+  - checkout: self
+    fetchDepth: 0
+
   - pwsh: |
       $PSVersionTable
       ./build.ps1 -BuildNumber $(Build.BuildNumber)
     displayName: Build Module
 
-  # - publish: ./out/
-
   - pwsh: |
       Import-Module Microsoft.PowerShell.PSResourceGet -PassThru
       Get-PSResourceRepository
-      Publish-PSResource -Path ./out/KnowIT.Builder -Repository PSGallery -ApiKey $env:PSGallery_ApiKey -Verbose
+      Publish-PSResource -Path ./out/$(ModuleName) -Repository PSGallery -ApiKey $env:PSGallery_ApiKey -Verbose
     env:
       PSGallery_ApiKey: $(PSGallery.ApiKey)
     displayName: Publish to PSGallery
+
+  - script: |
+      git push --prune https://$GITHUB_PAT@github.com/KnowIT-mx/$(ModuleName) \
+      +refs/remotes/origin/master:refs/heads/master +refs/tags/*:refs/tags/*
+    env:
+      GITHUB_PAT: $(GitHub.PAT)
+    displayName: Update GitHub Repository
