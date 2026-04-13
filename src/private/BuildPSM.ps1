@@ -2,8 +2,8 @@ function BuildPSM ($SourceFiles)
 {
     $ErrorActionPreference = 'Stop'
 
-    $moduleName = $ModuleData.ModuleName
-    $output = $ModuleData.OutputFolder
+    $moduleName = $script:ModuleData.ModuleName
+    $output = $script:ModuleData.OutputFolder
     Write-Build "  Building module file: '$moduleName.psm1'..."
     $null = New-Item $output -ItemType Directory -Force
 

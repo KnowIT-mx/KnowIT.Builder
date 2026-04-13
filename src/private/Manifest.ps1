@@ -36,7 +36,7 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.FunctionsToExport = $ModuleData.PublicFunctions
     $manifest.AliasesToExport = $ModuleData.Aliases
 
-    #TODO: Add Exported Aliases
+    #TODO: Review dependency handling
     if($ModuleData.ExternalModules) {
         $manifest.RequiredModules = $ModuleData.ExternalModules
         $manifest.ExternalModuleDependencies = $ModuleData.ExternalModules
