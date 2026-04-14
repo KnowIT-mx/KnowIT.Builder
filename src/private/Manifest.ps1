@@ -1,7 +1,7 @@
-function BuildManifest ([int]$BuildNumber = -1) {
+function BuildManifest ($ModuleData) {
 
     $moduleName = $ModuleData.ModuleName
-    Write-Build "  Building Module Manifest: '$moduleName.psd1'..."
+    Write-Build "Building Module Manifest: '$moduleName.psd1'..."
 
     $manifest = $ModuleData.Manifest
     $allowedParams = (Get-Command New-ModuleManifest).Parameters.Keys
@@ -16,7 +16,7 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.PrivateData ??= @{}
 
     $version, $prerelease = $ModuleData.Version.Split('-', 2)
-    $buildVersion = GetBuildVersion $version $BuildNumber
+    $buildVersion = GetBuildVersion $version $ModuleData.BuildNumber
     $manifest.ModuleVersion = $buildVersion
     if($prerelease) {
         $manifest.PreRelease = $prerelease
@@ -33,8 +33,8 @@ function BuildManifest ([int]$BuildNumber = -1) {
     $manifest.Author = $ModuleData.Author
     $manifest.Description = $ModuleData.Description
     $manifest.RootModule = "$moduleName.psm1"
-    $manifest.FunctionsToExport = $ModuleData.PublicFunctions
-    $manifest.AliasesToExport = $ModuleData.Aliases
+    $manifest.FunctionsToExport = @($ModuleData.PublicFunctions)
+    $manifest.AliasesToExport = @($ModuleData.Aliases)
 
     #TODO: Review dependency handling
     if($ModuleData.ExternalModules) {

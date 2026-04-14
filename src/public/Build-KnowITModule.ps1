@@ -20,40 +20,43 @@
     $ErrorActionPreference = 'Stop'
 
     try {
-        Write-Build 'Procesing module data file...'
-        $script:ModuleData = GetModuleFileData $Path
+        Write-Build 'Loading module data file and processing parameters...'
+        $moduleData = GetModuleFileData $Path
 
-        if($Version) {
-            $ModuleData.Version = $Version
+        switch ($PSCmdlet.ParameterSetName) {
+            'Version' {
+                $moduleData.Version = $Version
+                $moduleData.BuildNumber = -1
+            }
+            'BuildNumber' {
+                $null = ValidateVersion $moduleData.Version
+                $moduleData.BuildNumber = $BuildNumber
+            }
         }
-        else {
-            $null = ValidateVersion $ModuleData.Version
-        }
+
         if($PSBoundParameters.ContainsKey('MergePSM')) {
-            $script:ModuleData.MergePSM = $MergePSM.IsPresent
+            $moduleData.MergePSM = $MergePSM.IsPresent
         }
 
-        Push-Location $ModuleData.ProjectFolder
+        $projectFolder = $moduleData.ProjectFolder
+        Write-Build "  Module project folder: '$projectFolder'"
+        Push-Location $rPojectFolder
         if(Test-Path src -PathType Container) {
             Set-Location src
         }
-        $output = $ModuleData.OutputFolder
-        Write-Build "Module output location: '$output'"
-        if(Test-Path $output) {
-            $null = Remove-Item $output -Recurse -Force
+        Write-Build "  Module build output path: '$($moduleData.OutputFolder)'"
+        Write-Build
+
+        ProcessSourceFolders $moduleData
+        BuildPSM $moduleData
+
+        if($extra = $moduleData.ExtraContent) {
+            Write-Build "Copying extra content: ($($extra -join ', '))..."
+            Copy-Item $extra -Destination $moduleData.OutputFolder -Recurse -Force
         }
 
-        $sourceFiles = ProcessSourceFolders
-        BuildPSM $sourceFiles
-        $script:ModuleData.PublicFunctions = $sourceFiles.PublicFunctions
-        $script:ModuleData.Aliases = $sourceFiles.Aliases
-
-        if($extra = $ModuleData.ExtraContent) {
-            Write-Build "  Copying extra content: ($($extra -join ', '))..."
-            Copy-Item $extra -Destination $output -Recurse -Force
-        }
-
-        BuildManifest $BuildNumber
+        Write-Build
+        BuildManifest $moduleData
     }
     catch {
         $PSCmdlet.WriteError($_)

@@ -1,10 +1,15 @@
-function BuildPSM ($SourceFiles)
+function BuildPSM ($ModuleData)
 {
     $ErrorActionPreference = 'Stop'
 
-    $moduleName = $script:ModuleData.ModuleName
-    $output = $script:ModuleData.OutputFolder
-    Write-Build "  Building module file: '$moduleName.psm1'..."
+    $moduleName = $ModuleData.ModuleName
+    $output = $moduleData.OutputFolder
+
+    Write-Build "Building module file: '$moduleName.psm1'..."
+
+    if(Test-Path $output) {
+        $null = Remove-Item $output -Recurse -Force
+    }
     $null = New-Item $output -ItemType Directory -Force
 
     $sourceBuilder = [Text.StringBuilder]::new()
@@ -12,24 +17,24 @@ function BuildPSM ($SourceFiles)
     $requires = [Collections.Generic.SortedSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
     [void]$sourceBuilder.AppendLine("`n#region === Public functions ===")
-    foreach($source in $SourceFiles.Public) {
+    foreach($source in $ModuleData.PublicFiles) {
         [void]$sourceBuilder.AppendLine("`n### Source file: '$($source.Name)' ###")
         Get-Content $source | ParseSource $sourceBuilder $usings $requires
     }
     [void]$sourceBuilder.AppendLine("`n#endregion")
 
     [void]$sourceBuilder.AppendLine("`n#region === Private functions ===")
-    foreach($source in $SourceFiles.Private) {
+    foreach($source in $ModuleData.PrivateFiles) {
         [void]$sourceBuilder.AppendLine("`n### Source file: '$($source.Name)' ###")
         Get-Content $source | ParseSource $sourceBuilder $usings $requires
     }
     [void]$sourceBuilder.AppendLine("`n#endregion")
 
     if($ModuleData.MergePSM) {
-        $currentPSM = FindCurrentPSM
-        Write-Build "  Merging '$currentPSM' file..."
+        $sourcePSM = FindCurrentPSM $moduleName
+        Write-Build "  Merging '$sourcePSM' file..."
         [void]$sourceBuilder.AppendLine("`n#region === Source .psm1 file ===")
-        Get-Content $currentPSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
+        Get-Content $sourcePSM | ParseSource $sourceBuilder $usings $requires -SkipRegion '=== .Source files ==='
         [void]$sourceBuilder.AppendLine("`n#endregion")
     }
 
@@ -47,13 +52,13 @@ function BuildPSM ($SourceFiles)
     $sourceCode = $sourceBuilder.ToString()
 
     #TODO:External help
-    if($script:HelpFile) {
-        $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
-        $externalHelp = "# .ExternalHelp $ModuleName-help.xml`n"
-        $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
-    }
+    # if($script:HelpFile) {
+    #     $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
+    #     $externalHelp = "# .ExternalHelp $ModuleName-help.xml`n"
+    #     $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
+    # }
 
-    $sourceCode | Set-Content "$output/$moduleName.psm1" -Encoding utf8BOM
+    $sourceCode | Set-Content "$($ModuleData.OutputFolder)/$moduleName.psm1" -Encoding utf8BOM
 }
 
 
