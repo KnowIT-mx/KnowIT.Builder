@@ -15,7 +15,8 @@
         Tags              = 'Build', 'Development'
         CompanyName       = 'KnowIT Soluciones'
         Copyright         = '(c) 2025 KnowIT Soluciones'
-        ProjectUri        = 'https://github.com/JoseRa-KnowIT/KnowIT.Builder'
+        ProjectUri        = 'https://github.com/KnowIT-mx/KnowIT.Builder'
+        LicenseUri        = 'https://github.com/KnowIT-mx/KnowIT.Builder/blob/master/LICENSE'
         PowerShellVersion = 7.2
     }
 }
