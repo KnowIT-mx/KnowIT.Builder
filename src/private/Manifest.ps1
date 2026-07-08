@@ -11,8 +11,10 @@ function BuildManifest ($ModuleData) {
         $invalidKeys.ForEach({ $manifest.Remove($_) })
     }
     # Manifest default values
-    $manifest.CmdletsToExport = ''
-    $manifest.VariablesToExport = ''
+    $manifest.FunctionsToExport = [array]$manifest.FunctionsToExport ?? @()
+    $manifest.AliasesToExport = [array]$manifest.AliasesToExport ?? @()
+    $manifest.CmdletsToExport ??= ''
+    $manifest.VariablesToExport ??= ''
     $manifest.PrivateData ??= @{}
 
     $version, $prerelease = $ModuleData.Version.Split('-', 2)
@@ -33,16 +35,14 @@ function BuildManifest ($ModuleData) {
     $manifest.Author = $ModuleData.Author
     $manifest.Description = $ModuleData.Description
     $manifest.RootModule = "$moduleName.psm1"
-    $manifest.FunctionsToExport = @($ModuleData.PublicFunctions)
-    $manifest.AliasesToExport = @($ModuleData.Aliases)
+    $manifest.FunctionsToExport += $ModuleData.PublicFunctions ?? @()
+    $manifest.AliasesToExport += $ModuleData.Aliases ?? @()
 
     #TODO: Review dependency handling
     if($ModuleData.ExternalModules) {
         $manifest.RequiredModules = $ModuleData.ExternalModules
         $manifest.ExternalModuleDependencies = $ModuleData.ExternalModules
     }
-    # $manifest.NestedModules = $NestedModules
-    # $manifest.RequiredAssemblies = $Assemblies.ForEach({"bin/$_.dll"})
 
     $manifest.Path = Join-Path $ModuleData.OutputFolder "$moduleName.psd1"
 

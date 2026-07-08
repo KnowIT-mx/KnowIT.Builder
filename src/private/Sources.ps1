@@ -1,27 +1,33 @@
 ﻿function ProcessSourceFolders ($ModuleData)
 {
     Write-Build "Processing source files in folders: ($($ModuleData.PSSourceFiles -join ', '))..."
-    $ModuleData.PublicFiles = @()
-    $ModuleData.PrivateFiles = @()
+    $ModuleData.PublicFiles = [Collections.ArrayList]::new()
+    $ModuleData.PrivateFiles = [Collections.ArrayList]::new()
 
     foreach($path in $ModuleData.PSSourceFiles) {
-        $files = Get-ChildItem -Filter $path -Directory |
+        [array]$files = Get-ChildItem -Filter $path -Directory |
             Get-ChildItem -Filter '*.ps1' -Recurse
-        if($path -eq 'public') {
-            $ModuleData.PublicFiles = $files
+        if(!$files) { continue }
+        if($path -in $ModuleData.PSPublicSource) {
+            $ModuleData.PublicFiles.AddRange($files)
         }
         else {
-            $ModuleData.PrivateFiles += $files
+            $ModuleData.PrivateFiles.AddRange($files)
         }
     }
     $publicAst = foreach($source in $ModuleData.PublicFiles) {
         $ast = [Management.Automation.Language.Parser]::ParseFile($source.FullName, [ref]$null, [ref]$null)
         $ast.Find({ $args[0] -is [Management.Automation.Language.FunctionDefinitionAst] }, $false)
     }
-    $ModuleData.PublicFunctions = $publicAst.Name
-    $ModuleData.Aliases = $publicAst.Body.ParamBlock.Attributes.
-        Where({ $_.TypeName.Name -eq 'Alias' }).
-        PositionalArguments.Value
+    if($publicAst) {
+        $ModuleData.PublicFunctions = $publicAst.Name
+        $ModuleData.Aliases = $publicAst.Body.ParamBlock.Attributes.
+            Where({ $_.TypeName.Name -eq 'Alias' }).
+            PositionalArguments.Value
+    }
+    else {
+        Write-Warning "No public functions found in source files! Check PSSourceFiles setting."
+    }
 
     Write-Build "  Found $($ModuleData.PublicFunctions.Count) public functions and $($ModuleData.Aliases.Count) aliases"
     Write-Build

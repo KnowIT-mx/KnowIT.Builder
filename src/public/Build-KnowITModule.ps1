@@ -14,6 +14,12 @@
         [Parameter(ParameterSetName = 'BuildNumber')]
         [int]$BuildNumber = -1,
 
+        [string]$OutputFolder,
+
+        [string[]]$ExtraContent,
+
+        [hashtable]$Manifest,
+
         [switch]$MergePSM
     )
 
@@ -34,13 +40,34 @@
             }
         }
 
-        if($PSBoundParameters.ContainsKey('MergePSM')) {
-            $moduleData.MergePSM = $MergePSM.IsPresent
+        switch ($PSBoundParameters.Keys) {
+            'OutputFolder' {    
+                $moduleData.OutputFolder = [IO.Path]::GetFullPath([IO.Path]::Combine($OutputFolder, $moduleData.ModuleName), $PWD.Path)
+            }
+            'Manifest' {
+                foreach($key in $Manifest.Keys) {
+                    if($key -eq 'PrivateData') {
+                        $moduleData.Manifest.PrivateData ??= @{}
+                        foreach($subkey in $Manifest.PrivateData.Keys) {
+                            $moduleData.Manifest.PrivateData[$subkey] = $Manifest.PrivateData[$subkey]
+                        }
+                    }
+                    else {
+                        $moduleData.Manifest[$key] = $Manifest[$key]
+                    }
+                }
+            }
+            'MergePSM' {
+                $moduleData.MergePSM = $MergePSM.IsPresent
+            }
+            'ExtraContent' {
+                $moduleData.ExtraContent = $ExtraContent
+            }
         }
 
         $projectFolder = $moduleData.ProjectFolder
         Write-Build "  Module project folder: '$projectFolder'"
-        Push-Location $rPojectFolder
+        Push-Location $projectFolder
         if(Test-Path src -PathType Container) {
             Set-Location src
         }
