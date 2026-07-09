@@ -8,9 +8,9 @@
         [string]$Path = $PWD.Path
     )
 
-    $ErrorActionPreference = 'Stop'
-
     try {
+        Update-CallerPreference $PSCmdlet
+
         $modulePath = Join-Path $Path $Name
         if(Test-Path $modulePath) {
             throw "Directory '$modulePath' already exists. Can't create a new module in an existing folder!"

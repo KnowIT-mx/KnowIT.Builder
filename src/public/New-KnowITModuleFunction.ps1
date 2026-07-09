@@ -7,9 +7,9 @@
         [string]$Name
     )
 
-    $ErrorActionPreference = 'Stop'
-
     try {
+        Update-CallerPreference $PSCmdlet
+
         $moduleData = GetModuleFileData
         $srcFolder = Join-Path $moduleData.ProjectFolder 'src'
         if(!(Test-Path $srcFolder -PathType Container)) {

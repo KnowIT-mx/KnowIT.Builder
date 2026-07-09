@@ -23,9 +23,9 @@
         [switch]$MergePSM
     )
 
-    $ErrorActionPreference = 'Stop'
-
     try {
+        Update-CallerPreference $PSCmdlet
+
         Write-Build 'Loading module data file and processing parameters...'
         $moduleData = GetModuleFileData $Path
 

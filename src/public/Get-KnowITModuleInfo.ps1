@@ -7,9 +7,9 @@ function Get-KnowITModuleInfo {
         [string]$Path
     )
 
-    $ErrorActionPreference = 'Stop'
-
     try {
+        Update-CallerPreference $PSCmdlet
+
         $data = GetModuleFileData $Path
         [PSCustomObject]$data
         $null = ValidateVersion $data.Version
