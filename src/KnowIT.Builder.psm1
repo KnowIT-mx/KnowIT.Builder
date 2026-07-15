@@ -14,4 +14,7 @@ foreach($scriptFile in Get-ChildItem $sourceFolders -Include '*.ps1' -Recurse) {
 
 $script:PSModuleRoot = $PSScriptRoot
 
+# Alias for internal use only (not exported)
+Set-Alias -Name Write-Build -Value Write-KnowITBuild 
+
 #endregion
