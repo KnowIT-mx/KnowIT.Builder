@@ -5,7 +5,8 @@
     param(
         [Parameter(Position = 0)]
         [ValidateNotNullOrWhiteSpace()]
-        [string]$Path,
+        [Alias('Path')]
+        [string]$ProjectFolder,
 
         [Parameter(ParameterSetName = 'Version')]
         [ValidateScript({ ValidateVersion $_ })]
@@ -14,20 +15,19 @@
         [Parameter(ParameterSetName = 'BuildNumber')]
         [int]$BuildNumber = -1,
 
-        [string]$OutputFolder,
+        [Alias('OutputFolder')]
+        [string]$OutputPath,
 
         [string[]]$ExtraContent,
 
-        [hashtable]$Manifest,
-
-        [switch]$MergePSM
+        [hashtable]$Manifest
     )
 
     try {
         Update-CallerPreference $PSCmdlet
 
         Write-Build 'Loading module data file and processing parameters...'
-        $moduleData = GetModuleFileData $Path
+        $moduleData = GetModuleFileData $ProjectFolder
 
         switch ($PSCmdlet.ParameterSetName) {
             'Version' {
@@ -41,8 +41,8 @@
         }
 
         switch ($PSBoundParameters.Keys) {
-            'OutputFolder' {    
-                $moduleData.OutputFolder = [IO.Path]::GetFullPath([IO.Path]::Combine($OutputFolder, $moduleData.ModuleName), $PWD.Path)
+            'OutputPath' {
+                $moduleData.OutputFolder = [IO.Path]::GetFullPath([IO.Path]::Combine($OutputPath, $moduleData.ModuleName), $PWD.Path)
             }
             'Manifest' {
                 foreach($key in $Manifest.Keys) {
@@ -56,9 +56,6 @@
                         $moduleData.Manifest[$key] = $Manifest[$key]
                     }
                 }
-            }
-            'MergePSM' {
-                $moduleData.MergePSM = $MergePSM.IsPresent
             }
             'ExtraContent' {
                 $moduleData.ExtraContent = $ExtraContent

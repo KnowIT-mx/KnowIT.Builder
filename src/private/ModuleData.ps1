@@ -15,7 +15,6 @@ function GetModuleFileData ([string]$RootFolder)
     if($missingKeys) {
         throw "Missing required keys in module.psd1: ($($missingKeys -join ', '))"
     }
-    $data.Manifest ??= @{}
 
     $data.ProjectFolder = $RootFolder
     $outDir = $data.OutputFolder ?? 'out'
@@ -23,12 +22,15 @@ function GetModuleFileData ([string]$RootFolder)
 
     if($data.PSSourceFiles -is [hashtable]) {
         $data.PSPublicSource = $data.PSSourceFiles['Public']
-        $sourceFiles = $data.PSSourceFiles.Values.ForEach({ $_ }) 
+        $sourceFiles = $data.PSSourceFiles.Values.ForEach({ $_ })
         $data.PSSourceFiles = $sourceFiles
     }
     else {
         $data.PSPublicSource = 'public'
     }
+
+    $data.Manifest ??= @{}
+    $data.MergePSM ??= $true
 
     $data
 }

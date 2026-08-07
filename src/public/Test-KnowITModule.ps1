@@ -3,16 +3,18 @@
     [CmdletBinding()]
     [Alias('test')]
     param(
+        [string]$ProjectFolder,
+
         [Alias('Configuration')]
         [hashtable]$PesterConfiguration = @{},
 
-        [Alias('ModulePath')]
-        [string]$ImportModule, 
-        
+        [Alias('ImportModule','ModulePath')]
+        [string]$OutputModulePath,
+
         [switch]$NoThrow,
 
         [Parameter(ParameterSetName = 'Job')]
-        [switch]$AsJob, 
+        [switch]$AsJob,
 
         [Parameter(ParameterSetName = 'Job')]
         [ValidateSet('5.1')]
@@ -26,20 +28,25 @@
         Update-CallerPreference $PSCmdlet
 
         AssertPesterModule
+        $moduleData = GetModuleFileData $ProjectFolder
+        $moduleName = $moduleData.ModuleName
+        Write-KnowITBuild "Running tests for module '$moduleName'"
+
         $PesterConfiguration.Run ??= @{}
-        $PesterConfiguration.Run.Path ??= $PWD.Path
-        if($ImportModule) {
-            $ImportModule = Convert-Path $ImportModule
+        $PesterConfiguration.Run.Path ??= $moduleData.ProjectFolder
+        if($OutputModulePath) {
+            $importModule = Convert-Path $OutputModulePath
         }
 
         $script = {
             param($PesterConfiguration, $ImportModule, $DebugPreference)
-            
+
             $VerbosePreference = 'SilentlyContinue'
             $DebugPreference = $DebugPreference
+
             Write-Debug ($PSVersionTable | Out-String)
-            
-            Import-Module Pester
+            Import-Module Pester -DisableNameChecking
+
            # Pester v5 does not support ArrayLists in the configuration Hashtable
             foreach($section in $PesterConfiguration.Values) {
                 foreach($key in @($section.Keys)) {
@@ -47,7 +54,7 @@
                         $section[$key] = $section[$key].ToArray()
                     }
                 }
-            }   
+            }
             Write-Debug "Pester configuration: $($PesterConfiguration | Out-String)"
             $pesterConfig = New-PesterConfiguration -Hashtable $PesterConfiguration
             $pesterConfig.Run.PassThru = $true
@@ -61,23 +68,23 @@
         $testOutput = if($AsJob) {
             $params = @{
                 ScriptBlock = $script
-                ArgumentList = @($PesterConfiguration, $ImportModule, $DebugPreference)
+                ArgumentList = @($PesterConfiguration, $importModule, $DebugPreference)
             }
             if($InitializationScript) {
                 $params.InitializationScript = $InitializationScript
             }
             if($JobVersion) {
-                Write-Build "[TEST] Running tests in a PowerShell $JobVersion job..." Magenta
+                Write-Build "[TEST] Running tests in a PowerShell $JobVersion job ..." Yellow
                 $params.PSVersion = $JobVersion
             }
             else {
-                Write-Build '[TEST] Running tests in a PowerShell job...' Magenta
+                Write-Build '[TEST] Running tests in a PowerShell job ...' Yellow
             }
             Start-Job @params | Receive-Job -Wait -AutoRemoveJob
         }
         else {
-            Write-Build '[TEST] Running tests in the current PowerShell session...' Magenta
-            Invoke-Command $script -ArgumentList $PesterConfiguration, $ImportModule, $DebugPreference
+            Write-Build '[TEST] Running tests in the current PowerShell session ...' Yellow
+            Invoke-Command $script -ArgumentList $PesterConfiguration, $importModule, $DebugPreference
         }
 
         if(!$testOutput) {
@@ -85,7 +92,7 @@
         }
         if($NoThrow) {
             return $testOutput
-        }   
+        }
         if($testOutput.FailedCount -gt 0) {
             throw "$($testOutput.FailedCount) test(s) failed!"
         }

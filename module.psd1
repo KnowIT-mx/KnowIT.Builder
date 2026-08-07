@@ -5,10 +5,8 @@
     Author        = 'José Ramón Aguilar'
     Version       = '0.7.x-prerelease'
 
-    MergePSM      = $true
     PSSourceFiles = 'public', 'private'
     ExtraContent  = 'template'
-    # ExternalModules = 'PlatyPS'
 
     # Optional Manifest parameters
     Manifest = @{

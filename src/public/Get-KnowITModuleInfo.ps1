@@ -4,13 +4,14 @@ function Get-KnowITModuleInfo {
     [CmdletBinding()]
     [Alias('moduleinfo')]
     param(
-        [string]$Path
+        [Alias('Path')]
+        [string]$ProjectFolder
     )
 
     try {
         Update-CallerPreference $PSCmdlet
 
-        $data = GetModuleFileData $Path
+        $data = GetModuleFileData $ProjectFolder
         [PSCustomObject]$data
         $null = ValidateVersion $data.Version
     }
