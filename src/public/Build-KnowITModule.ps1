@@ -78,6 +78,15 @@
             Write-Build "Copying extra content: ($($extra -join ', '))..."
             Copy-Item $extra -Destination $moduleData.OutputFolder -Recurse -Force
         }
+        if(Test-Path $moduleData.DocsFolder -PathType Container) {
+            try {
+                BuildHelpFile $moduleData
+            }
+            catch {
+                Write-Warning 'A problem ocurred building the help file. The module will still be built, but the help file will not be included.'
+                Write-Warning $_
+            }
+        }
 
         Write-Build
         BuildManifest $moduleData

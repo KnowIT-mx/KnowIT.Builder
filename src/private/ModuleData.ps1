@@ -28,6 +28,7 @@ function GetModuleFileData ([string]$RootFolder)
     else {
         $data.PSPublicSource = 'public'
     }
+    $data.DocsFolder = Join-Path $RootFolder 'docs' $data.ModuleName
 
     $data.Manifest ??= @{}
     $data.MergePSM ??= $true

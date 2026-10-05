@@ -3,7 +3,7 @@
     ModuleId      = 'd96aca93-5299-4999-bca4-2ab84d215f33'
     Description   = 'Module to help in the creation and building of new PowerShell Modules'
     Author        = 'José Ramón Aguilar'
-    Version       = '0.7.x-prerelease'
+    Version       = '0.8.x-prerelease'
 
     PSSourceFiles = 'public', 'private'
     ExtraContent  = 'template'
