@@ -31,6 +31,17 @@
 
     Write-Build "  Found $($ModuleData.PublicFunctions.Count) public functions and $($ModuleData.Aliases.Count) aliases"
     Write-Build
+
+    Write-Build "Checking for markdown documentation in: '$($ModuleData.DocsFolder.Replace($ModuleData.ProjectFolder, '.'))'..."
+    if(Test-Path $ModuleData.DocsFolder -Filter '*.md') {
+        Write-Build "  Help file will be generated from markdown files."
+        $ModuleData.BuildHelp = $true
+    }
+    else {
+        Write-Build '  No help file will be generated. Markdown files not found.'
+        $ModuleData.BuildHelp = $false
+    }
+    Write-Build
 }
 
 function FindCurrentPSM ([string]$ModuleName)

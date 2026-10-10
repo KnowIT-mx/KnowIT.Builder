@@ -1,4 +1,15 @@
-﻿function BuildHelpFile ($ModuleData)
+﻿function AssertPlatyPSModule {
+    $platyps = Get-Module -Name Microsoft.PowerShell.PlatyPS -ListAvailable -Verbose:$false
+    | Sort-Object -Property Version -Descending
+    | Select-Object -First 1
+
+    if(!$platyps -or $platyps.Version -lt [version]'1.0.3') {
+        throw 'PlatyPS module is not installed. Please install it from the PowerShell Gallery. Run the following command:
+         `Install-PSResource -Name Microsoft.PowerShell.PlatyPS -Repository PSGallery`'
+    }
+}
+
+function BuildHelpFile ($ModuleData)
 {
     $moduleName = $ModuleData.ModuleName
     Write-Build "Building Help File: '$moduleName-Help.xml'..."

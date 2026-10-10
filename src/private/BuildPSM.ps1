@@ -51,12 +51,11 @@ function BuildPSM ($ModuleData)
 
     $sourceCode = $sourceBuilder.ToString()
 
-    #TODO:External help
-    # if($script:HelpFile) {
-    #     $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
-    #     $externalHelp = "# .ExternalHelp $ModuleName-help.xml`n"
-    #     $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
-    # }
+    if($ModuleData.BuildHelp) {
+        $helpPattern = "(?ms)(\<#.*?\.SYNOPSIS.*?#>)"
+        $externalHelp = "# .EXTERNALHELP $ModuleName-Help.xml`n"
+        $sourceCode = $sourceCode -replace $helpPattern, $externalHelp
+    }
 
     $sourceCode | Set-Content "$($ModuleData.OutputFolder)/$moduleName.psm1" -Encoding utf8BOM
 }

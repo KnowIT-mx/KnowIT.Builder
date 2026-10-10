@@ -75,16 +75,17 @@
         BuildPSM $moduleData
 
         if($extra = $moduleData.ExtraContent) {
-            Write-Build "Copying extra content: ($($extra -join ', '))..."
+            Write-Build "  Copying extra content: ($($extra -join ', '))..."
             Copy-Item $extra -Destination $moduleData.OutputFolder -Recurse -Force
         }
-        if(Test-Path $moduleData.DocsFolder -PathType Container) {
+        if($moduleData.BuildHelp) {
             try {
                 BuildHelpFile $moduleData
             }
             catch {
-                Write-Warning 'A problem ocurred building the help file. The module will still be built, but the help file will not be included.'
+                Write-Warning 'A problem ocurred building the help file:'
                 Write-Warning $_
+                Write-Warning 'The module will continue to build, but help file will not be included.'
             }
         }
 
